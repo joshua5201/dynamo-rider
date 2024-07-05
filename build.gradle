@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'com.avast.gradle.docker-compose' version '0.17.7'
+}
+
+group = 'io.github.joshua5201'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform('software.amazon.awssdk:bom:2.21.1')
+    implementation 'software.amazon.awssdk:dynamodb'
+    implementation 'com.fasterxml.jackson.jr:jackson-jr-objects:2.17.1'
+    implementation 'com.fasterxml.jackson.jr:jackson-jr-extension-javatime:2.17.1'
+    implementation 'com.fasterxml.jackson.jr:jackson-jr-annotation-support:2.17.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.mockito:mockito-core:5.12.0"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
+}
+
+test {
+    dependsOn('composeUp')
+    doFirst {
+        dockerCompose.exposeAsEnvironment(test)
+    }
+    useJUnitPlatform()
+}
+
+dockerCompose {
+    isRequiredBy(test)
+}
